@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { 
+      margin: 0; 
+      padding: 20px; 
+      background: #f0f0f0;
+      font-family: Arial, sans-serif;
+    }
+    .icon-container {
+      display: inline-block;
+      margin: 10px;
+      text-align: center;
+    }
+    .icon {
+      width: 128px;
+      height: 128px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 20%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 64px;
+      font-weight: bold;
+      margin: 0 auto 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .instructions {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+    }
+    canvas {
+      border: 1px solid #ddd;
+      margin: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="instructions">
+    <h2>Icon Generator</h2>
+    <p>Right-click each icon below and "Save image as" to save as PNG:</p>
+    <div id="icons"></div>
+    <p><strong>Instructions:</strong></p>
+    <ol>
+      <li>Right-click each icon above</li>
+      <li>Save as: icon16.png, icon48.png, icon128.png</li>
+      <li>Place them in the extension/icons/ folder</li>
+    </ol>
+  </div>
+
+  <script>
+    function createIcon(size) {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      
+      // Create gradient
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      gradient.addColorStop(0, '#667eea');
+      gradient.addColorStop(1, '#764ba2');
+      
+      // Draw rounded rectangle
+      const radius = size * 0.15;
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.moveTo(radius, 0);
+      ctx.lineTo(size - radius, 0);
+      ctx.quadraticCurveTo(size, 0, size, radius);
+      ctx.lineTo(size, size - radius);
+      ctx.quadraticCurveTo(size, size, size - radius, size);
+      ctx.lineTo(radius, size);
+      ctx.quadraticCurveTo(0, size, 0, size - radius);
+      ctx.lineTo(0, radius);
+      ctx.quadraticCurveTo(0, 0, radius, 0);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Draw "C"
+      ctx.fillStyle = 'white';
+      ctx.font = `bold ${size * 0.6}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('C', size / 2, size / 2);
+      
+      return canvas;
+    }
+    
+    const sizes = [16, 48, 128];
+    const container = document.getElementById('icons');
+    
+    sizes.forEach(size => {
+      const div = document.createElement('div');
+      div.className = 'icon-container';
+      const canvas = createIcon(size);
+      div.appendChild(canvas);
+      div.innerHTML += `<br><small>icon${size}.png (${size}x${size})</small>`;
+      container.appendChild(div);
+    });
+  </script>
+</body>
+</html>

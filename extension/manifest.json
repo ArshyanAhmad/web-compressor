@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "Compressor - Web Performance Optimizer",
+  "version": "1.0.0",
+  "description": "Optimize web pages by removing images, CSS, videos, and fonts for faster loading",
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab",
+    "webRequest",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/content.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["content/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist/
+build/
+*.zip
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Extension
+extension/dist/
+extension/*.zip
+
+# Website
+website/dist/
+website/.next/
+
+# Backend
+backend/node_modules/
+backend/.env
+backend/*.log

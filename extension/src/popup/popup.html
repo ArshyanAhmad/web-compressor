@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compressor</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <div class="header">
+      <h1>Compressor</h1>
+      <p class="subtitle">Web Performance Optimizer</p>
+    </div>
+
+    <!-- Main Toggle -->
+    <div class="toggle-section">
+      <div class="toggle-item">
+        <span class="toggle-label">Extension</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="mainToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="toggle-item" id="cssToggleContainer" style="display: none;">
+        <span class="toggle-label">Remove CSS</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="cssToggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Current Website Info -->
+    <div class="website-info" id="websiteInfo">
+      <div class="info-item">
+        <span class="info-label">Website:</span>
+        <span class="info-value" id="currentUrl">Loading...</span>
+      </div>
+    </div>
+
+    <!-- Performance Metrics -->
+    <div class="metrics-section" id="metricsSection" style="display: none;">
+      <h3>Performance Metrics</h3>
+      
+      <div class="metric-card">
+        <div class="metric-row">
+          <span class="metric-label">Load Time:</span>
+          <div class="metric-values">
+            <span class="metric-before" id="loadTimeBefore">-</span>
+            <span class="metric-arrow">→</span>
+            <span class="metric-after" id="loadTimeAfter">-</span>
+          </div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Page Size:</span>
+          <div class="metric-values">
+            <span class="metric-before" id="sizeBefore">-</span>
+            <span class="metric-arrow">→</span>
+            <span class="metric-after" id="sizeAfter">-</span>
+          </div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Images Removed:</span>
+          <span class="metric-value" id="imagesRemoved">0</span>
+        </div>
+        <div class="metric-row">
+          <span class="metric-label">Performance Gain:</span>
+          <span class="metric-value positive" id="performanceGain">0%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="actions-section">
+      <button class="btn btn-primary" id="getFullInfoBtn" style="display: none;">
+        Get Full Info
+      </button>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <a href="https://your-website.com" target="_blank" class="footer-link">Visit Website</a>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

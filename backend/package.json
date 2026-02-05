@@ -1,0 +1,29 @@
+{
+  "name": "compressor-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Compressor - Web Performance Optimizer",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "cheerio": "^1.0.0-rc.12",
+    "axios": "^1.6.2",
+    "helmet": "^7.1.0",
+    "express-rate-limit": "^7.1.2",
+    "node-cache": "^5.1.2"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "performance",
+    "optimization",
+    "html-parser",
+    "api"
+  ],
+  "author": "",
+  "license": "MIT"
+}

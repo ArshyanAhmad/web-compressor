@@ -1,0 +1,28 @@
+{
+  "name": "compressor",
+  "version": "1.0.0",
+  "description": "Web Performance Optimizer - Chrome Extension & Website",
+  "private": true,
+  "workspaces": [
+    "extension",
+    "website",
+    "backend"
+  ],
+  "scripts": {
+    "build:extension": "cd extension && npm run build",
+    "build:website": "cd website && npm run build",
+    "build": "npm run build:extension && npm run build:website",
+    "dev:website": "cd website && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "start:backend": "cd backend && npm start",
+    "install:all": "cd extension && npm install && cd ../website && npm install && cd ../backend && npm install"
+  },
+  "keywords": [
+    "performance",
+    "optimization",
+    "chrome-extension",
+    "web-speed"
+  ],
+  "author": "",
+  "license": "MIT"
+}

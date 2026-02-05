@@ -1,0 +1,38 @@
+/**
+ * Global Styles
+ * 
+ * Tailwind CSS imports and base styles
+ * Light grey/black theme foundation
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-light-grey text-dark-grey font-sans antialiased;
+  }
+  
+  * {
+    @apply border-gray-300;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-gradient-to-r from-purple-600 to-purple-800 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5;
+  }
+  
+  .btn-secondary {
+    @apply bg-white text-dark-grey px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200;
+  }
+  
+  .card {
+    @apply bg-white rounded-xl shadow-lg p-6;
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent;
+  }
+}
