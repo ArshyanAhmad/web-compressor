@@ -25,7 +25,7 @@ export async function optimizeHTML(html, options = {}) {
     removeFonts = true
   } = options;
 
-  const $ = cheerio.load(html);
+  let $ = cheerio.load(html);
   
   let imagesRemoved = 0;
   let cssRemoved = 0;

@@ -30,6 +30,14 @@ let cssStash = {
   stashed: false,
 };
 
+let lastRemoval = {
+  imagesRemoved: 0,
+  cssRemoved: 0,
+  videosRemoved: 0,
+  fontsRemoved: 0,
+  snapshotBytes: 0,
+};
+
 function byteSize(str) {
   try {
     return new Blob([str]).size;
@@ -49,7 +57,10 @@ function measurePerformance() {
   let fontCount = 0;
 
   resources.forEach((resource) => {
-    if (resource.transferSize) totalSize += resource.transferSize;
+    // Cross-origin resources often report 0 unless Timing-Allow-Origin is set.
+    // Use transferSize when available, otherwise encodedBodySize as a fallback.
+    const size = resource.transferSize || resource.encodedBodySize || 0;
+    totalSize += size;
     const name = (resource.name || '').toLowerCase();
     if (/\.(jpg|jpeg|png|gif|webp|svg|ico)(\?|$)/.test(name)) imageCount++;
     if (name.includes('.css') || resource.initiatorType === 'link') cssCount++;
@@ -57,14 +68,22 @@ function measurePerformance() {
     if (/\.(woff2?|ttf|otf|eot)(\?|$)/.test(name)) fontCount++;
   });
 
+  const start = navigation?.startTime ?? 0;
+  const dcl = navigation?.domContentLoadedEventEnd ?? 0;
+  const loadEnd = navigation?.loadEventEnd ?? 0;
+  const loadTime = loadEnd > 0 ? (loadEnd - start) : (dcl > 0 ? (dcl - start) : 0);
+
+  const htmlBytes = byteSize(document.documentElement?.outerHTML || '');
+
   return {
-    loadTime: navigation ? navigation.loadEventEnd - navigation.fetchStart : 0,
+    loadTime: Math.max(0, loadTime),
     totalSize,
     imageCount,
     cssCount,
     videoCount,
     fontCount,
     resourceCount: resources.length,
+    htmlBytes,
   };
 }
 
@@ -104,19 +123,29 @@ function removeAllCSS() {
     cssStash.stashed = true;
   }
 
-  const links = document.querySelectorAll('link[rel="stylesheet"]');
-  links.forEach((link) => link.remove());
+  const cssLinks = document.querySelectorAll('link[rel="stylesheet"]');
+  const cssLinksRemoved = cssLinks.length;
+  cssLinks.forEach((link) => link.remove());
 
   // Remove preloaded fonts/styles too
-  document.querySelectorAll('link[rel="preload"][as="font"], link[rel="preload"][as="style"], link[href*=".woff"], link[href*=".woff2"], link[href*=".ttf"], link[href*=".otf"], link[href*=".eot"]').forEach((l) => l.remove());
+  const fontLinks = document.querySelectorAll('link[rel="preload"][as="font"], link[href*=".woff"], link[href*=".woff2"], link[href*=".ttf"], link[href*=".otf"], link[href*=".eot"]');
+  const fontLinksRemoved = fontLinks.length;
+  fontLinks.forEach((l) => l.remove());
+
+  const preloadStyle = document.querySelectorAll('link[rel="preload"][as="style"]');
+  const preloadStyleRemoved = preloadStyle.length;
+  preloadStyle.forEach((l) => l.remove());
 
   const styles = document.querySelectorAll('style');
+  const styleTagsRemoved = styles.length;
   styles.forEach((style) => style.remove());
 
-  const all = document.querySelectorAll('*');
-  all.forEach((el) => {
-    if (el.hasAttribute('style')) el.removeAttribute('style');
-  });
+  const inlineEls = document.querySelectorAll('[style]');
+  const inlineRemoved = inlineEls.length;
+  inlineEls.forEach((el) => el.removeAttribute('style'));
+
+  lastRemoval.cssRemoved = cssLinksRemoved + styleTagsRemoved + preloadStyleRemoved + inlineRemoved;
+  lastRemoval.fontsRemoved = fontLinksRemoved;
 
   const reset = document.createElement('style');
   reset.id = 'compressor-reset';
@@ -151,14 +180,19 @@ function restoreAllCSS() {
 }
 
 function removeImages() {
+  let removed = 0;
   document.querySelectorAll('img').forEach((img) => {
-    if (img.src) {
-      img.dataset.originalSrc = img.src;
-      img.removeAttribute('src');
+    const srcAttr = img.getAttribute('src');
+    const effective = srcAttr || img.currentSrc || img.src;
+    if (effective) {
+      removed += 1;
+      img.dataset.originalSrc = effective;
+      img.setAttribute('src', '');
       img.style.cssText = 'background:#f0f0f0;min-height:50px;display:flex;align-items:center;justify-content:center;color:#666;font-size:12px;border:1px dashed #ccc';
       img.textContent = img.alt ? `[Image: ${img.alt}]` : '[Image removed]';
     }
   });
+  lastRemoval.imagesRemoved = removed;
 
   document.querySelectorAll('*').forEach((el) => {
     const bg = window.getComputedStyle(el).backgroundImage;
@@ -170,14 +204,16 @@ function removeImages() {
 }
 
 function removeVideos() {
-  document.querySelectorAll('video, iframe[src*="youtube"], iframe[src*="vimeo"], [src*=".mp4"], [src*=".webm"]').forEach((el) => {
-    el.remove();
-  });
+  const els = document.querySelectorAll('video, iframe[src*="youtube"], iframe[src*="vimeo"], [src*=".mp4"], [src*=".webm"]');
+  lastRemoval.videosRemoved = els.length;
+  els.forEach((el) => el.remove());
 }
 
 function removeHeavyElements() {
   // Replace media-heavy/interactive elements with lightweight placeholders
-  document.querySelectorAll('picture, source, svg, canvas, audio, object, embed, iframe').forEach((el) => {
+  const els = document.querySelectorAll('picture, source, svg, canvas, audio, object, embed, iframe');
+  lastRemoval.videosRemoved += els.length;
+  els.forEach((el) => {
     // Keep iframe if it contains important text? default: remove
     el.remove();
   });
@@ -224,6 +260,13 @@ function buildLightSnapshot() {
 }
 
 function applyOptimizations({ removeCSS }) {
+  // reset counts per run
+  lastRemoval.imagesRemoved = 0;
+  lastRemoval.cssRemoved = 0;
+  lastRemoval.videosRemoved = 0;
+  lastRemoval.fontsRemoved = 0;
+  lastRemoval.snapshotBytes = 0;
+
   if (removeCSS) removeAllCSS();
   else restoreAllCSS();
   disableAnimations();
@@ -231,6 +274,43 @@ function applyOptimizations({ removeCSS }) {
   removeVideos();
   removeHeavyElements();
   ensureSystemFonts();
+}
+
+function reportMetricsAndCache({ removeCSS }) {
+  chrome.runtime.sendMessage({ action: 'getBaseline', url: window.location.href }, (resp) => {
+    const baseline = resp?.baseline || null;
+    const beforePerf = baseline?.perf || measurePerformance();
+    const beforeHtmlBytes = baseline?.htmlBytes ?? beforePerf.htmlBytes ?? 0;
+
+    const afterPerf = measurePerformance();
+    const snap = buildLightSnapshot();
+    lastRemoval.snapshotBytes = snap.bytes;
+
+    const improvement = {
+      // timing is only truly improved if extension was ON before the page loaded.
+      beforeLoadTime: beforePerf.loadTime,
+      afterLoadTime: afterPerf.loadTime,
+      loadTimeReduction: beforePerf.loadTime - afterPerf.loadTime,
+
+      // Treat \"Page size\" as HTML bytes (accurate, CORS-safe)
+      beforeSize: beforeHtmlBytes,
+      afterSize: snap.bytes,
+      sizeReduction: beforeHtmlBytes - snap.bytes,
+
+      imagesRemoved: lastRemoval.imagesRemoved,
+      cssRemoved: removeCSS ? lastRemoval.cssRemoved : 0,
+      videosRemoved: lastRemoval.videosRemoved,
+      fontsRemoved: lastRemoval.fontsRemoved,
+    };
+
+    chrome.runtime.sendMessage({ action: 'storeMetrics', url: window.location.href, metrics: improvement });
+    chrome.runtime.sendMessage({
+      action: 'setCachedData',
+      url: window.location.href,
+      cssRemovalEnabled: removeCSS,
+      data: { html: snap.html, htmlBytes: snap.bytes, metrics: improvement },
+    });
+  });
 }
 
 function observeDynamicHeavyContent({ removeCSS }) {
@@ -273,40 +353,7 @@ function optimizePage() {
 
       whenLoaded(() => {
         performanceMetrics.after = measurePerformance();
-        const before = performanceMetrics.before;
-        const after = performanceMetrics.after;
-
-        const improvement = {
-          loadTimeReduction: before.loadTime - after.loadTime,
-          sizeReduction: before.totalSize - after.totalSize,
-          imagesRemoved: before.imageCount,
-          cssRemoved: removeCSS ? before.cssCount : 0,
-          videosRemoved: before.videoCount,
-          fontsRemoved: before.fontCount,
-          beforeLoadTime: before.loadTime,
-          afterLoadTime: after.loadTime,
-          beforeSize: before.totalSize,
-          afterSize: after.totalSize,
-        };
-
-        chrome.runtime.sendMessage({
-          action: 'storeMetrics',
-          url: window.location.href,
-          metrics: improvement,
-        });
-
-        const snap = buildLightSnapshot();
-
-        chrome.runtime.sendMessage({
-          action: 'setCachedData',
-          url: window.location.href,
-          cssRemovalEnabled: removeCSS,
-          data: {
-            html: snap.html,
-            htmlBytes: snap.bytes,
-            metrics: improvement,
-          },
-        });
+        reportMetricsAndCache({ removeCSS });
       });
     });
 
@@ -332,7 +379,7 @@ function checkAndApplyOptimization() {
         chrome.runtime.sendMessage({
           action: 'storeBaseline',
           url: window.location.href,
-          baseline: { perf },
+          baseline: { perf, htmlBytes: perf.htmlBytes },
         });
       });
       return;
@@ -354,7 +401,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       return;
     }
     // apply CSS toggle instantly without reload
-    applyOptimizations({ removeCSS: st.cssRemovalEnabled !== false });
+    const removeCSS = st.cssRemovalEnabled !== false;
+    applyOptimizations({ removeCSS });
+    reportMetricsAndCache({ removeCSS });
     sendResponse({ success: true });
     return;
   }
