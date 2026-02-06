@@ -17,6 +17,7 @@ import NodeCache from 'node-cache';
 import { optimizeHTML } from './services/optimizer.js';
 import { fetchWebsite } from './services/fetcher.js';
 import { calculateMetrics } from './services/metrics.js';
+import { runPageSpeed } from './services/pagespeed.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -46,6 +47,31 @@ app.use('/api/', limiter);
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+/**
+ * GET /api/pagespeed?url=...&strategy=mobile|desktop
+ * Fetches Google PageSpeed Insights metrics for a URL.
+ */
+app.get('/api/pagespeed', async (req, res) => {
+  try {
+    const { url, strategy = 'mobile' } = req.query;
+    if (!url) return res.status(400).json({ error: 'url is required' });
+
+    // Validate URL
+    let targetUrl;
+    try {
+      targetUrl = new URL(url);
+    } catch {
+      return res.status(400).json({ error: 'Invalid URL format' });
+    }
+
+    const result = await runPageSpeed(targetUrl.href, strategy);
+    res.json(result);
+  } catch (error) {
+    console.error('PageSpeed error:', error?.message || error);
+    res.status(500).json({ error: 'Failed to run PageSpeed', message: error.message });
+  }
 });
 
 /**

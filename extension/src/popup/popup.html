@@ -9,83 +9,114 @@
 <body>
   <div class="popup-container">
     <!-- Header -->
-    <div class="header">
-      <h1>Compressor</h1>
-      <p class="subtitle">Web Performance Optimizer</p>
-    </div>
+    <header class="header">
+      <div class="logo">
+        <span class="logo-icon">C</span>
+        <div class="logo-text">
+          <h1>Compressor</h1>
+          <p class="subtitle">Performance Optimizer</p>
+        </div>
+      </div>
+    </header>
 
-    <!-- Main Toggle -->
-    <div class="toggle-section">
-      <div class="toggle-item">
-        <span class="toggle-label">Extension</span>
-        <label class="toggle-switch">
+    <!-- Toggles -->
+    <section class="toggles-card">
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <span class="toggle-name">Extension</span>
+          <span class="toggle-desc">Optimize this site</span>
+        </div>
+        <label class="switch">
           <input type="checkbox" id="mainToggle">
-          <span class="slider"></span>
+          <span class="switch-slider"></span>
         </label>
       </div>
-      
-      <div class="toggle-item" id="cssToggleContainer" style="display: none;">
-        <span class="toggle-label">Remove CSS</span>
-        <label class="toggle-switch">
+      <div class="toggle-row" id="cssToggleContainer" style="display: none;">
+        <div class="toggle-info">
+          <span class="toggle-name">Remove CSS</span>
+          <span class="toggle-desc">Strip styles for speed</span>
+        </div>
+        <label class="switch">
           <input type="checkbox" id="cssToggle" checked>
-          <span class="slider"></span>
+          <span class="switch-slider"></span>
         </label>
       </div>
-    </div>
+    </section>
 
-    <!-- Current Website Info -->
-    <div class="website-info" id="websiteInfo">
-      <div class="info-item">
-        <span class="info-label">Website:</span>
-        <span class="info-value" id="currentUrl">Loading...</span>
+    <!-- Current site -->
+    <section class="site-card">
+      <span class="card-label">Current site</span>
+      <p class="site-url" id="currentUrl">—</p>
+    </section>
+
+    <!-- Performance metrics -->
+    <section class="metrics-card" id="metricsSection" style="display: none;">
+      <div class="metrics-header">
+        <span class="card-label">Performance</span>
+        <span class="badge" id="performanceGain">0%</span>
       </div>
-    </div>
 
-    <!-- Performance Metrics -->
-    <div class="metrics-section" id="metricsSection" style="display: none;">
-      <h3>Performance Metrics</h3>
-      
-      <div class="metric-card">
-        <div class="metric-row">
-          <span class="metric-label">Load Time:</span>
-          <div class="metric-values">
-            <span class="metric-before" id="loadTimeBefore">-</span>
-            <span class="metric-arrow">→</span>
-            <span class="metric-after" id="loadTimeAfter">-</span>
+      <div class="metrics-grid">
+        <div class="metric-box">
+          <span class="metric-name">Load time</span>
+          <div class="metric-comparison">
+            <span class="before" id="loadTimeBefore">—</span>
+            <span class="arrow">→</span>
+            <span class="after" id="loadTimeAfter">—</span>
           </div>
         </div>
-        <div class="metric-row">
-          <span class="metric-label">Page Size:</span>
-          <div class="metric-values">
-            <span class="metric-before" id="sizeBefore">-</span>
-            <span class="metric-arrow">→</span>
-            <span class="metric-after" id="sizeAfter">-</span>
+        <div class="metric-box">
+          <span class="metric-name">Page size</span>
+          <div class="metric-comparison">
+            <span class="before" id="sizeBefore">—</span>
+            <span class="arrow">→</span>
+            <span class="after" id="sizeAfter">—</span>
           </div>
         </div>
-        <div class="metric-row">
-          <span class="metric-label">Images Removed:</span>
-          <span class="metric-value" id="imagesRemoved">0</span>
+        <div class="metric-box">
+          <span class="metric-name">Images removed</span>
+          <span class="metric-single" id="imagesRemoved">0</span>
         </div>
-        <div class="metric-row">
-          <span class="metric-label">Performance Gain:</span>
-          <span class="metric-value positive" id="performanceGain">0%</span>
+        <div class="metric-box">
+          <span class="metric-name">CSS removed</span>
+          <span class="metric-single" id="cssRemoved">0</span>
+        </div>
+        <div class="metric-box">
+          <span class="metric-name">Videos removed</span>
+          <span class="metric-single" id="videosRemoved">0</span>
+        </div>
+        <div class="metric-box">
+          <span class="metric-name">Fonts removed</span>
+          <span class="metric-single" id="fontsRemoved">0</span>
+        </div>
+        <div class="metric-box full">
+          <span class="metric-name">Size reduction</span>
+          <span class="metric-single highlight" id="sizeReduction">—</span>
+        </div>
+        <div class="metric-box full">
+          <span class="metric-name">Time saved</span>
+          <span class="metric-single highlight" id="timeSaved">—</span>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Action Buttons -->
-    <div class="actions-section">
-      <button class="btn btn-primary" id="getFullInfoBtn" style="display: none;">
-        Get Full Info
+    <!-- Empty state -->
+    <section class="empty-state" id="emptyState">
+      <div class="empty-icon">📊</div>
+      <p>Enable the extension and browse to see metrics here.</p>
+    </section>
+
+    <!-- Actions -->
+    <section class="actions">
+      <button type="button" class="btn-primary" id="getFullInfoBtn" style="display: none;">
+        Get full report
       </button>
-    </div>
+    </section>
 
-    <!-- Footer -->
-    <div class="footer">
-      <a href="https://your-website.com" target="_blank" class="footer-link">Visit Website</a>
-    </div>
+    <footer class="footer">
+      <a href="http://localhost:5173" target="_blank" class="footer-link">Open dashboard</a>
+    </footer>
   </div>
-
   <script src="popup.js"></script>
 </body>
 </html>

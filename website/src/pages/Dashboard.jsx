@@ -11,7 +11,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
-import { API_ENDPOINTS } from '../config'
+import { API_ENDPOINTS, API_BASE_URL } from '../config'
 import {
   LineChart,
   Line,
@@ -32,6 +32,7 @@ function Dashboard() {
   const [searchParams] = useSearchParams()
   const [url, setUrl] = useState('')
   const [metrics, setMetrics] = useState(null)
+  const [psi, setPsi] = useState(null)
   const [loading, setLoading] = useState(false)
 
   // Parse data from URL if coming from extension
@@ -110,9 +111,20 @@ function Dashboard() {
       
       // Set metrics
       setMetrics(data.metrics)
+      setPsi(null)
+
+      // Fetch PageSpeed (best-effort)
+      try {
+        const psiRes = await fetch(`${API_BASE_URL}/api/pagespeed?url=${encodeURIComponent(targetUrl)}&strategy=mobile`)
+        if (psiRes.ok) {
+          const psiData = await psiRes.json()
+          setPsi(psiData)
+        }
+      } catch {}
       
-      // Open optimized version in new tab
-      const optimizedUrl = `${API_ENDPOINTS.optimizePage}?url=${encodeURIComponent(targetUrl)}`
+      // Open optimized version in new tab.
+      // Add `compressor=1` so the extension auto-enables on that tab.
+      const optimizedUrl = `${API_ENDPOINTS.optimizePage}?url=${encodeURIComponent(targetUrl)}&compressor=1&css=1`
       window.open(optimizedUrl, '_blank')
       
     } catch (error) {
@@ -227,6 +239,27 @@ function Dashboard() {
                 <div className="text-gray-600">Images Removed</div>
               </div>
             </div>
+
+            {/* PageSpeed Insights (optional) */}
+            {psi && (
+              <div className="card mb-8">
+                <h3 className="text-xl font-bold mb-4">Google PageSpeed Insights</h3>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-lg border border-gray-200 bg-white">
+                    <div className="text-gray-500 text-sm">Performance score</div>
+                    <div className="text-3xl font-bold text-purple-600">{psi.performanceScore ?? '—'}</div>
+                  </div>
+                  <div className="p-4 rounded-lg border border-gray-200 bg-white">
+                    <div className="text-gray-500 text-sm">LCP</div>
+                    <div className="text-2xl font-bold">{psi.display?.lcp ?? '—'}</div>
+                  </div>
+                  <div className="p-4 rounded-lg border border-gray-200 bg-white">
+                    <div className="text-gray-500 text-sm">CLS</div>
+                    <div className="text-2xl font-bold">{psi.display?.cls ?? '—'}</div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Charts Section */}
             <div className="grid md:grid-cols-2 gap-6 mb-8">

@@ -7,8 +7,9 @@
     "storage",
     "tabs",
     "activeTab",
-    "webRequest",
-    "scripting"
+    "scripting",
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess"
   ],
   "host_permissions": [
     "<all_urls>"
